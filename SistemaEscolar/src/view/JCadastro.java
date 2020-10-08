@@ -1,11 +1,52 @@
 package view;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 
 public class JCadastro extends javax.swing.JFrame {
-
+    
+    // Criando variavel de conexão
+        Connection con;
+        
     public void Close() {
         this.setVisible(false);
         this.setEnabled(false);
+    }
+    
+    public void conectandoBanco() throws SQLException, ClassNotFoundException {
+            Class.forName("com.mysql.jdbc.Driver");
+            
+            // Cria/pega uma conexão com o banco
+            String stringConexao = "jdbc:mysql://localhost:3306/sistemaescolar?autoReconnect=true&useSSL=false";
+            con = DriverManager.getConnection(stringConexao, "root", "");
+            
+    }
+    
+    public void solicitandoQuery() throws SQLException {
+        // Cria a String para inserir no banco
+            String insertQuery = "INSERT INTO funcionarios (nome, materia, senha) VALUES (?,?,?)";
+            
+            // cria o comando
+            PreparedStatement stmt = con.prepareStatement(insertQuery);
+            
+            // Seta os valores na string de inserção
+            stmt.setString(1, txtNome.getText());
+            stmt.setString(2, txtMateria.getText());
+            stmt.setString(3, txtSenha.getText());
+            
+            // Executa o comando no banco de dados 
+            stmt.executeUpdate();
+            
+            
+            // Fecha o comando e a conexão
+            stmt.close();
+            con.close();
     }
     
     public JCadastro() {
@@ -162,10 +203,19 @@ public class JCadastro extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnConfirmarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmarActionPerformed
-        
+            try {
+                conectandoBanco();
+                solicitandoQuery();
+            } catch (SQLException ex) {
+                JOptionPane.showConfirmDialog(null, "Impossivel solicitar a query");
+            } catch (ClassNotFoundException ex) {
+                JOptionPane.showMessageDialog(null, "DataBase não encontrada");
+            }
         
         
         Close();
+        JLogin jl = new JLogin();
+        jl.setVisible(true);
         
         
     }//GEN-LAST:event_btnConfirmarActionPerformed
